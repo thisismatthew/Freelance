@@ -29,7 +29,7 @@ public class Hayley : MonoBehaviour
     public List<SpriteRenderer> BodySprites;
     private CamerShake shaker;
     private float invisiTimer = 3f;
-
+    [SerializeField] private float moveTweenTime = 1f;
     public List<GameObject> nodes = new List<GameObject>();
     public float loved =5f;
     public Slider loveSlider;
@@ -76,10 +76,10 @@ public class Hayley : MonoBehaviour
             }
 
             MoveAlongNodes();
-            if (loved >= 30f)
+            if (loved <= 0)
             {
                 FindObjectOfType<AudioManager>().Play("Thank");
-                loved = 30f;
+                loved = 0f;
                 State = HayleyStates.Retreat;
             }
 
@@ -98,10 +98,10 @@ public class Hayley : MonoBehaviour
         }
         if(State == HayleyStates.Dormant)
         {
-            loved -= Time.deltaTime;
+            loved += Time.deltaTime;
             Mathf.Clamp(loved, 0, 40f);
 
-            if (loved < 7f && !ThreatMade)
+            if (loved > 23f && !ThreatMade)
             {
                 FindObjectOfType<AudioManager>().Play("Yell");
                 shaker.shake = 7;
@@ -117,9 +117,9 @@ public class Hayley : MonoBehaviour
 
             SliderLeft = false;
             SliderEntered = false;
-            if (loved <= 0)
+            if (loved >= 30f)
             {
-                loved = 0;
+                loved = 30f;
                 State = HayleyStates.Start;
             }
         }
@@ -131,7 +131,7 @@ public class Hayley : MonoBehaviour
     {
         if (collision.tag == "Heart")
         {
-            loved += 1f;
+            loved -= 1f;
             Mathf.Clamp(loved, 0, 50f);
             Destroy(collision.gameObject);
         }
@@ -145,6 +145,8 @@ public class Hayley : MonoBehaviour
         {
             //lerp to it
             this.GetComponent<Rigidbody2D>().MovePosition(Vector2.Lerp(transform.position, nodes[currentNode].transform.position, timer));
+            //Old version above, going to use DoTween for the new movement. 
+
         }
         else
         {
